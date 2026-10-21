@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">Surgical EQ &amp; ANC</string>
+    <string name="notification_channel_name">DSP Engine Active</string>
+    <string name="notification_channel_desc">Mantiene activo el motor de ecualización y aislamiento de ruido.</string>
+    <string name="notification_title">Surgical Audio DSP</string>
+    <string name="notification_text">Ecualizador de precisión quirúrgica activo</string>
+    <string name="action_stop">Detener</string>
+</resources>

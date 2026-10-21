@@ -1,0 +1,66 @@
+name: Build and Auto-Release APK
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Compilar y Publicar APK
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Clonar repositorio
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Configurar JDK 17 (Temurin)
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Configurar permisos de ejecución para Gradle Wrapper
+        run: chmod +x gradlew
+
+      - name: Compilar APK Debug
+        run: ./gradlew assembleDebug --stacktrace
+
+      - name: Preparar binario APK para distribución
+        run: |
+          mkdir -p release-artifacts
+          cp app/build/outputs/apk/debug/app-debug.apk release-artifacts/Surgical-Audio-EQ-HTCNE76.apk
+
+      - name: Subir artefacto de compilación
+        uses: actions/upload-artifact@v4
+        with:
+          name: Surgical-Audio-EQ-HTCNE76
+          path: release-artifacts/Surgical-Audio-EQ-HTCNE76.apk
+          retention-days: 14
+
+      - name: Publicar GitHub Release con actualización OTA
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG_NAME="v1.0.${{ github.run_number }}"
+          RELEASE_TITLE="Surgical Audio EQ v1.0.${{ github.run_number }}"
+          RELEASE_NOTES="### 🚀 Actualización Automática de Surgical Audio EQ (HTC NE76 Pro)
+          
+          - **Commit**: \`${{ github.sha }}\`
+          - **Rama**: \`${{ github.ref_name }}\`
+          - **Mensaje**: ${{ github.event.head_commit.message }}
+          
+          Esta versión se descarga e instala automáticamente desde la propia app gracias al actualizador OTA integrado."
+
+          gh release create "$TAG_NAME" \
+            release-artifacts/Surgical-Audio-EQ-HTCNE76.apk \
+            --title "$RELEASE_TITLE" \
+            --notes "$RELEASE_NOTES" \
+            --latest

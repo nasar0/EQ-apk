@@ -1,0 +1,15 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Equalizer bars / Sound wave in Neon Cyan & Blue -->
+    <path
+        android:fillColor="#00F5D4"
+        android:pathData="M24,44h6v28h-6zM36,32h6v48h-6zM48,22h6v64h-6zM60,36h6v40h-6zM72,28h6v54h-6zM84,48h6v20h-6z"/>
+    <!-- Surgical pulse circle -->
+    <path
+        android:strokeColor="#00BBF9"
+        android:strokeWidth="2.5"
+        android:pathData="M18,54 A36,36 0 1,1 90,54 A36,36 0 1,1 18,54"/>
+</vector>
