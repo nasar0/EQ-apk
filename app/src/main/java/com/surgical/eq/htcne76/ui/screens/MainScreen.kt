@@ -2,7 +2,6 @@ package com.surgical.eq.htcne76.ui.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -21,7 +20,6 @@ import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
@@ -66,12 +64,10 @@ fun MainScreen(
     val uiState by viewModel.uiState.collectAsState()
     var selectedTab by remember { mutableIntStateOf(0) }
 
-    // Estados del actualizador OTA integrado
     val updateInfo by AppUpdater.updateInfoFlow.collectAsState()
     val isDownloading by AppUpdater.isDownloading.collectAsState()
     val downloadProgress by AppUpdater.downloadProgress.collectAsState()
 
-    // Comprobar actualizaciones automáticamente al abrir la app
     LaunchedEffect(Unit) {
         AppUpdater.checkForUpdates(context)
     }
@@ -85,7 +81,7 @@ fun MainScreen(
                     .fillMaxWidth()
                     .background(OledBlack)
                     .border(0.5.dp, DarkBorder)
-                    .padding(horizontal = 16.dp, vertical = 12.dp)
+                    .padding(horizontal = 12.dp, vertical = 6.dp)
             ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -95,63 +91,61 @@ fun MainScreen(
                         imageVector = Icons.Default.GraphicEq,
                         contentDescription = "Logo",
                         tint = NeonCyan,
-                        modifier = Modifier.size(24.dp)
+                        modifier = Modifier.size(18.dp)
                     )
-                    Spacer(modifier = Modifier.width(10.dp))
+                    Spacer(modifier = Modifier.width(8.dp))
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
                             text = "SURGICAL AUDIO DSP",
                             fontFamily = FontFamily.Monospace,
                             fontWeight = FontWeight.Bold,
-                            fontSize = 15.sp,
-                            letterSpacing = 1.sp,
+                            fontSize = 11.5.sp,
+                            letterSpacing = 0.5.sp,
                             color = DarkTextPrimary
                         )
                         Text(
-                            text = "HTC NE76 Edition • Auto CI/CD Ready",
-                            style = MaterialTheme.typography.bodyMedium.copy(fontSize = 11.sp),
+                            text = "HTC NE76 Edition • Auto CI/CD",
+                            fontSize = 8.5.sp,
                             color = DarkTextSecondary
                         )
                     }
 
-                    // Botón para comprobar actualizaciones OTA manualmente
                     IconButton(
                         onClick = {
                             scope.launch {
                                 AppUpdater.checkForUpdates(context)
                             }
                         },
-                        modifier = Modifier.size(28.dp)
+                        modifier = Modifier.size(24.dp)
                     ) {
                         Icon(
                             imageVector = Icons.Default.Refresh,
-                            contentDescription = "Comprobar Actualizaciones",
+                            contentDescription = "Actualizar",
                             tint = DarkTextSecondary,
-                            modifier = Modifier.size(18.dp)
+                            modifier = Modifier.size(14.dp)
                         )
                     }
 
-                    Spacer(modifier = Modifier.width(6.dp))
+                    Spacer(modifier = Modifier.width(4.dp))
 
-                    // Badge de estado de auriculares
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier
-                            .background(DarkSurface, RoundedCornerShape(12.dp))
-                            .border(1.dp, DarkBorder, RoundedCornerShape(12.dp))
-                            .padding(horizontal = 8.dp, vertical = 4.dp)
+                            .background(DarkSurface, RoundedCornerShape(8.dp))
+                            .border(0.7.dp, DarkBorder, RoundedCornerShape(8.dp))
+                            .padding(horizontal = 6.dp, vertical = 3.dp)
                     ) {
                         Box(
                             modifier = Modifier
-                                .width(6.dp)
-                                .height(6.dp)
-                                .background(EmeraldActive, RoundedCornerShape(3.dp))
+                                .width(5.dp)
+                                .height(5.dp)
+                                .background(EmeraldActive, RoundedCornerShape(2.5.dp))
                         )
-                        Spacer(modifier = Modifier.width(5.dp))
+                        Spacer(modifier = Modifier.width(4.dp))
                         Text(
                             text = "HTC NE76",
                             fontFamily = FontFamily.Monospace,
-                            fontSize = 10.sp,
+                            fontSize = 8.5.sp,
                             fontWeight = FontWeight.SemiBold,
                             color = DarkTextPrimary
                         )
@@ -163,7 +157,9 @@ fun MainScreen(
             NavigationBar(
                 containerColor = OledBlack,
                 tonalElevation = 0.dp,
-                modifier = Modifier.border(0.5.dp, DarkBorder)
+                modifier = Modifier
+                    .height(56.dp)
+                    .border(0.5.dp, DarkBorder)
             ) {
                 NavigationBarItem(
                     selected = selectedTab == 0,
@@ -171,14 +167,15 @@ fun MainScreen(
                     icon = {
                         Icon(
                             imageVector = Icons.Default.Tune,
-                            contentDescription = "Ecualizador Pro"
+                            contentDescription = "Ecualizador",
+                            modifier = Modifier.size(18.dp)
                         )
                     },
                     label = {
                         Text(
-                            text = "Ecualizador Pro",
+                            text = "Ecualizador",
                             fontFamily = FontFamily.Monospace,
-                            fontSize = 11.sp
+                            fontSize = 9.sp
                         )
                     },
                     colors = NavigationBarItemDefaults.colors(
@@ -196,14 +193,15 @@ fun MainScreen(
                     icon = {
                         Icon(
                             imageVector = Icons.Default.Hearing,
-                            contentDescription = "ANC Lab"
+                            contentDescription = "ANC Lab",
+                            modifier = Modifier.size(18.dp)
                         )
                     },
                     label = {
                         Text(
                             text = "ANC Lab",
                             fontFamily = FontFamily.Monospace,
-                            fontSize = 11.sp
+                            fontSize = 9.sp
                         )
                     },
                     colors = NavigationBarItemDefaults.colors(
@@ -222,13 +220,12 @@ fun MainScreen(
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            // Banner de actualización OTA cuando hay nuevo commit/release en GitHub
             UpdateNotificationBanner(
                 updateInfo = updateInfo,
                 isDownloading = isDownloading,
                 downloadProgress = downloadProgress,
                 onDismiss = { AppUpdater.dismissUpdate() },
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
             )
 
             Box(modifier = Modifier.fillMaxSize()) {

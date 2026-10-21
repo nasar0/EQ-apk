@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -24,7 +23,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.surgical.eq.htcne76.data.EqBand
 import com.surgical.eq.htcne76.ui.theme.DarkBorder
-import com.surgical.eq.htcne76.ui.theme.DarkSurfaceVariant
 import com.surgical.eq.htcne76.ui.theme.DarkTextSecondary
 import com.surgical.eq.htcne76.ui.theme.ElectricBlue
 import com.surgical.eq.htcne76.ui.theme.NeonCyan
@@ -50,58 +48,56 @@ fun FrequencyCurveCanvas(
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .height(160.dp)
-            .background(Color.Black, RoundedCornerShape(12.dp))
-            .border(1.dp, DarkBorder, RoundedCornerShape(12.dp))
-            .padding(8.dp)
+            .height(105.dp)
+            .background(Color.Black, RoundedCornerShape(8.dp))
+            .border(0.7.dp, DarkBorder, RoundedCornerShape(8.dp))
+            .padding(6.dp)
     ) {
         Canvas(modifier = Modifier.fillMaxSize()) {
             val width = size.width
             val height = size.height
             val midY = height / 2f
 
-            // 1. Dibujar líneas de cuadrícula (Grid)
-            // Línea 0 dB
+            // 1. Línea 0 dB
             drawLine(
                 color = DarkBorder.copy(alpha = 0.8f),
                 start = Offset(0f, midY),
                 end = Offset(width, midY),
-                strokeWidth = 1.5f
+                strokeWidth = 1f
             )
 
-            // Líneas de referencia +10dB y -10dB
+            // Líneas +10dB y -10dB
             val y10Db = midY - (10f / maxDb) * midY
             val yMinus10Db = midY + (10f / maxDb) * midY
             drawLine(
-                color = DarkBorder.copy(alpha = 0.4f),
+                color = DarkBorder.copy(alpha = 0.3f),
                 start = Offset(0f, y10Db),
                 end = Offset(width, y10Db),
-                strokeWidth = 1f
+                strokeWidth = 0.8f
             )
             drawLine(
-                color = DarkBorder.copy(alpha = 0.4f),
+                color = DarkBorder.copy(alpha = 0.3f),
                 start = Offset(0f, yMinus10Db),
                 end = Offset(width, yMinus10Db),
-                strokeWidth = 1f
+                strokeWidth = 0.8f
             )
 
-            // Frecuencias clave verticales: 100 Hz, 1 kHz, 10 kHz
+            // Frecuencias guía: 100 Hz, 1 kHz, 10 kHz
             val gridFreqs = listOf(100f, 1000f, 10000f)
             gridFreqs.forEach { f ->
                 val x = width * ((log10(f) - logMin) / logSpan)
                 drawLine(
-                    color = DarkBorder.copy(alpha = 0.4f),
+                    color = DarkBorder.copy(alpha = 0.3f),
                     start = Offset(x, 0f),
                     end = Offset(x, height),
-                    strokeWidth = 1f
+                    strokeWidth = 0.8f
                 )
             }
 
-            // 2. Calcular la curva combinada de respuesta en frecuencia
-            val numSteps = 120
+            // 2. Curva combinada
+            val numSteps = 100
             val path = Path()
             val fillPath = Path()
-
             var isFirst = true
 
             for (step in 0..numSteps) {
@@ -138,67 +134,62 @@ fun FrequencyCurveCanvas(
             fillPath.lineTo(width, height)
             fillPath.close()
 
-            // 3. Rellenar degradado bajo la curva
             if (isEnabled) {
                 drawPath(
                     path = fillPath,
                     brush = Brush.verticalGradient(
                         colors = listOf(
-                            NeonCyan.copy(alpha = 0.25f),
+                            NeonCyan.copy(alpha = 0.2f),
                             Color.Transparent
                         )
                     )
                 )
             }
 
-            // 4. Dibujar trazo de la curva
             drawPath(
                 path = path,
-                color = if (isEnabled) NeonCyan else DarkTextSecondary.copy(alpha = 0.5f),
-                style = Stroke(width = 2.5f)
+                color = if (isEnabled) NeonCyan else DarkTextSecondary.copy(alpha = 0.4f),
+                style = Stroke(width = 2f)
             )
 
-            // 5. Puntos destacados de cada banda activa
+            // Puntos destacados
             if (isEnabled) {
                 bands.forEach { b ->
                     val x = width * ((log10(b.frequencyHz.coerceIn(minFreq, maxFreq)) - logMin) / logSpan)
                     val y = midY - (b.gainDb.coerceIn(minDb, maxDb) / maxDb) * midY
 
-                    // Halo exterior
                     drawCircle(
-                        color = ElectricBlue.copy(alpha = 0.4f),
-                        radius = 8f,
+                        color = ElectricBlue.copy(alpha = 0.35f),
+                        radius = 6f,
                         center = Offset(x, y)
                     )
-                    // Punto central
                     drawCircle(
                         color = if (b.isEnabled) NeonCyan else DarkTextSecondary,
-                        radius = 4f,
+                        radius = 3f,
                         center = Offset(x, y)
                     )
                 }
             }
         }
 
-        // Etiquetas de frecuencias
         Text(
             text = "60Hz",
             color = DarkTextSecondary,
-            fontSize = 9.sp,
+            fontSize = 8.sp,
             fontFamily = FontFamily.Monospace,
             modifier = Modifier.align(Alignment.BottomStart)
         )
         Text(
             text = "1kHz",
             color = DarkTextSecondary,
-            fontSize = 9.sp,
+            fontSize = 8.sp,
             fontFamily = FontFamily.Monospace,
             modifier = Modifier.align(Alignment.BottomCenter)
         )
         Text(
             text = "16kHz",
             color = DarkTextSecondary,
-            fontSize = 9.sp,
+            fontSize = 8.sp,
             fontFamily = FontFamily.Monospace,
             modifier = Modifier.align(Alignment.BottomEnd)
         )

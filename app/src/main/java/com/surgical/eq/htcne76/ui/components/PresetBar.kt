@@ -5,7 +5,6 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -18,7 +17,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -50,7 +48,7 @@ fun PresetBar(
         modifier = modifier
             .fillMaxWidth()
             .horizontalScroll(scrollState),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        horizontalArrangement = Arrangement.spacedBy(6.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         presets.forEach { preset ->
@@ -61,32 +59,31 @@ fun PresetBar(
                 modifier = Modifier
                     .background(
                         if (isSelected) NeonCyanDim else DarkSurfaceVariant,
-                        RoundedCornerShape(20.dp)
+                        RoundedCornerShape(14.dp)
                     )
                     .border(
-                        1.dp,
+                        0.8.dp,
                         if (isSelected) NeonCyan else DarkBorder,
-                        RoundedCornerShape(20.dp)
+                        RoundedCornerShape(14.dp)
                     )
                     .clickable { onPresetSelected(preset) }
-                    .padding(horizontal = 14.dp, vertical = 7.dp)
+                    .padding(horizontal = 9.dp, vertical = 4.dp)
             ) {
                 Text(
                     text = preset.name,
-                    style = MaterialTheme.typography.bodyMedium.copy(
-                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
-                        color = if (isSelected) NeonCyan else DarkTextPrimary
-                    )
+                    fontSize = 10.sp,
+                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+                    color = if (isSelected) NeonCyan else DarkTextPrimary
                 )
 
                 if (preset.isCustom) {
-                    Spacer(modifier = Modifier.width(6.dp))
+                    Spacer(modifier = Modifier.width(4.dp))
                     Icon(
                         imageVector = Icons.Default.Close,
-                        contentDescription = "Eliminar preset",
+                        contentDescription = "Eliminar",
                         tint = DarkTextSecondary,
                         modifier = Modifier
-                            .size(14.dp)
+                            .size(11.dp)
                             .clickable { onDeleteCustomPresetClicked(preset.id) }
                     )
                 }
@@ -97,24 +94,23 @@ fun PresetBar(
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
-                .background(Color.Black, RoundedCornerShape(20.dp))
-                .border(1.dp, DarkBorder, RoundedCornerShape(20.dp))
+                .background(Color.Black, RoundedCornerShape(14.dp))
+                .border(0.8.dp, DarkBorder, RoundedCornerShape(14.dp))
                 .clickable { onSaveNewPresetClicked() }
-                .padding(horizontal = 12.dp, vertical = 7.dp)
+                .padding(horizontal = 8.dp, vertical = 4.dp)
         ) {
             Icon(
                 imageVector = Icons.Default.Add,
-                contentDescription = "Guardar Preset",
+                contentDescription = "Guardar",
                 tint = NeonCyan,
-                modifier = Modifier.size(16.dp)
+                modifier = Modifier.size(12.dp)
             )
-            Spacer(modifier = Modifier.width(4.dp))
+            Spacer(modifier = Modifier.width(2.dp))
             Text(
                 text = "Guardar",
-                style = MaterialTheme.typography.bodyMedium.copy(
-                    color = NeonCyan,
-                    fontWeight = FontWeight.SemiBold
-                )
+                fontSize = 9.5.sp,
+                color = NeonCyan,
+                fontWeight = FontWeight.SemiBold
             )
         }
     }

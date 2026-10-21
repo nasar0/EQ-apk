@@ -6,7 +6,6 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -16,7 +15,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.LinearProgressIndicator
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -59,19 +57,19 @@ fun DecibelMeterView(
     )
 
     val statusDescription = when {
-        !isMicActive -> "Micrófono en reposo • Pulsa para calibrar"
-        ambientDb < 40f -> "Silencioso • Óptimo para descanso"
-        ambientDb < 55f -> "Ruido moderado • Conversación / Hogar"
-        ambientDb < 70f -> "Ruido alto • Motores / Tráfico (ANC activo)"
-        else -> "Ruido crítico • Máximo aislamiento activado"
+        !isMicActive -> "Micrófono en reposo"
+        ambientDb < 40f -> "Silencioso"
+        ambientDb < 55f -> "Ruido moderado (Hogar)"
+        ambientDb < 70f -> "Ruido alto (Motores/Tráfico)"
+        else -> "Ruido crítico (Máximo aislamiento)"
     }
 
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .background(DarkSurfaceVariant, RoundedCornerShape(12.dp))
-            .border(1.dp, DarkBorder, RoundedCornerShape(12.dp))
-            .padding(14.dp)
+            .background(DarkSurfaceVariant.copy(alpha = 0.7f), RoundedCornerShape(8.dp))
+            .border(0.7.dp, DarkBorder, RoundedCornerShape(8.dp))
+            .padding(horizontal = 10.dp, vertical = 8.dp)
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -80,52 +78,49 @@ fun DecibelMeterView(
         ) {
             Column {
                 Text(
-                    text = "SONÓMETRO AMBIENTE EN TIEMPO REAL",
-                    style = MaterialTheme.typography.labelSmall.copy(
-                        color = DarkTextSecondary,
-                        letterSpacing = 1.sp
-                    )
+                    text = "SONÓMETRO AMBIENTE",
+                    fontFamily = FontFamily.Monospace,
+                    fontSize = 8.5.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = DarkTextSecondary,
+                    letterSpacing = 0.6.sp
                 )
-                Spacer(modifier = Modifier.height(2.dp))
                 Text(
                     text = statusDescription,
-                    style = MaterialTheme.typography.bodyMedium.copy(
-                        color = if (isMicActive) meterColor else DarkTextSecondary
-                    )
+                    fontSize = 10.sp,
+                    color = if (isMicActive) meterColor else DarkTextSecondary
                 )
             }
 
-            // Lectura digital grande
             Row(verticalAlignment = Alignment.Bottom) {
                 Text(
                     text = String.format(Locale.US, "%.1f", ambientDb),
                     fontFamily = FontFamily.Monospace,
-                    fontSize = 28.sp,
+                    fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
                     color = if (isMicActive) meterColor else DarkTextSecondary
                 )
                 Spacer(modifier = Modifier.width(3.dp))
                 Text(
-                    text = "dB SPL",
+                    text = "dB",
                     fontFamily = FontFamily.Monospace,
-                    fontSize = 12.sp,
+                    fontSize = 9.sp,
                     color = DarkTextSecondary,
-                    modifier = Modifier.padding(bottom = 4.dp)
+                    modifier = Modifier.padding(bottom = 2.dp)
                 )
             }
         }
 
-        Spacer(modifier = Modifier.height(10.dp))
+        Spacer(modifier = Modifier.height(6.dp))
 
-        // Barra de vúmetro de decibelios con segmentos degradados
         LinearProgressIndicator(
             progress = { animatedProgress },
             color = meterColor,
             trackColor = Color.Black,
             modifier = Modifier
                 .fillMaxWidth()
-                .height(8.dp)
-                .border(0.5.dp, DarkBorder, RoundedCornerShape(4.dp))
+                .height(5.dp)
+                .border(0.5.dp, DarkBorder, RoundedCornerShape(3.dp))
         )
     }
 }

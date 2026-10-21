@@ -3,7 +3,6 @@ package com.surgical.eq.htcne76.ui.components
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -15,7 +14,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
@@ -46,11 +44,6 @@ import com.surgical.eq.htcne76.ui.theme.DarkTextSecondary
 import com.surgical.eq.htcne76.ui.theme.NeonCyan
 import java.util.Locale
 
-/**
- * Control Híbrido Quirúrgico: Slider táctil + Campo de texto numérico exacto.
- * Permite ajustar valores tanto arrastrando la barra como escribiendo el número
- * exacto con decimales en el teclado.
- */
 @Composable
 fun HybridSliderField(
     title: String,
@@ -101,9 +94,9 @@ fun HybridSliderField(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .background(DarkSurfaceVariant.copy(alpha = 0.5f), RoundedCornerShape(10.dp))
-            .border(1.dp, DarkBorder, RoundedCornerShape(10.dp))
-            .padding(horizontal = 12.dp, vertical = 8.dp)
+            .background(DarkSurfaceVariant.copy(alpha = 0.6f), RoundedCornerShape(8.dp))
+            .border(0.7.dp, DarkBorder, RoundedCornerShape(8.dp))
+            .padding(horizontal = 8.dp, vertical = 6.dp)
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -112,33 +105,31 @@ fun HybridSliderField(
         ) {
             Text(
                 text = title,
-                style = MaterialTheme.typography.bodyMedium.copy(
-                    fontWeight = FontWeight.SemiBold,
-                    color = if (enabled) DarkTextPrimary else DarkTextSecondary
-                )
+                fontFamily = FontFamily.SansSerif,
+                fontWeight = FontWeight.Medium,
+                fontSize = 10.5.sp,
+                color = if (enabled) DarkTextPrimary else DarkTextSecondary
             )
 
-            // Caja editable numérica compacta
+            // Entrada numérica compacta
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
-                    .background(Color.Black, RoundedCornerShape(6.dp))
+                    .background(Color.Black, RoundedCornerShape(5.dp))
                     .border(
-                        1.dp,
+                        0.7.dp,
                         if (isEditing) accentColor else DarkBorder,
-                        RoundedCornerShape(6.dp)
+                        RoundedCornerShape(5.dp)
                     )
-                    .padding(horizontal = 8.dp, vertical = 4.dp)
+                    .padding(horizontal = 5.dp, vertical = 2.dp)
             ) {
                 BasicTextField(
                     value = if (isEditing) textState else formatNumber(value),
-                    onValueChange = { input ->
-                        textState = input
-                    },
+                    onValueChange = { input -> textState = input },
                     enabled = enabled,
                     textStyle = TextStyle(
                         fontFamily = FontFamily.Monospace,
-                        fontSize = 13.sp,
+                        fontSize = 11.sp,
                         fontWeight = FontWeight.Bold,
                         color = if (enabled) accentColor else DarkTextSecondary,
                         textAlign = TextAlign.End
@@ -153,7 +144,7 @@ fun HybridSliderField(
                         onDone = { submitText() }
                     ),
                     modifier = Modifier
-                        .width(62.dp)
+                        .width(48.dp)
                         .onFocusChanged { focusState ->
                             isEditing = focusState.isFocused
                             if (focusState.isFocused) {
@@ -164,28 +155,22 @@ fun HybridSliderField(
                         }
                 )
 
-                Spacer(modifier = Modifier.width(4.dp))
+                Spacer(modifier = Modifier.width(2.dp))
 
                 Text(
                     text = unit,
-                    style = TextStyle(
-                        fontFamily = FontFamily.Monospace,
-                        fontSize = 11.sp,
-                        color = DarkTextSecondary
-                    )
+                    fontFamily = FontFamily.Monospace,
+                    fontSize = 9.sp,
+                    color = DarkTextSecondary
                 )
             }
         }
 
-        Spacer(modifier = Modifier.height(4.dp))
-
-        // Barra deslizante de precisión
+        // Slider ultra-compacto
         Slider(
             value = value.coerceIn(range.start, range.endInclusive),
             onValueChange = { newVal ->
-                if (!isEditing) {
-                    onValueChange(newVal)
-                }
+                if (!isEditing) onValueChange(newVal)
             },
             valueRange = range,
             enabled = enabled,
@@ -198,7 +183,7 @@ fun HybridSliderField(
             ),
             modifier = Modifier
                 .fillMaxWidth()
-                .height(30.dp)
+                .height(22.dp)
         )
     }
 }

@@ -15,13 +15,12 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Divider
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -36,6 +35,7 @@ import com.surgical.eq.htcne76.ui.components.FrequencyCurveCanvas
 import com.surgical.eq.htcne76.ui.components.HybridSliderField
 import com.surgical.eq.htcne76.ui.components.PresetBar
 import com.surgical.eq.htcne76.ui.components.SavePresetDialog
+import com.surgical.eq.htcne76.ui.components.VerticalFader
 import com.surgical.eq.htcne76.ui.theme.AcidPink
 import com.surgical.eq.htcne76.ui.theme.CyberAmber
 import com.surgical.eq.htcne76.ui.theme.DarkBorder
@@ -58,6 +58,7 @@ fun EqualizerScreen(
 ) {
     val scrollState = rememberScrollState()
     var showSaveDialog by remember { mutableStateOf(false) }
+    var selectedBandIndex by remember { mutableIntStateOf(0) }
 
     if (showSaveDialog) {
         SavePresetDialog(
@@ -74,53 +75,46 @@ fun EqualizerScreen(
             .fillMaxSize()
             .background(OledBlack)
             .verticalScroll(scrollState)
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+            .padding(horizontal = 10.dp, vertical = 8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        // 1. Tarjeta Maestra: Switch Master + Insignia HTC NE76
+        // 1. Barra Maestra Compacta: Switch + Presets
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(DarkSurface, RoundedCornerShape(14.dp))
-                .border(1.dp, if (uiState.isMasterEnabled) NeonCyan else DarkBorder, RoundedCornerShape(14.dp))
-                .padding(14.dp)
+                .background(DarkSurface, RoundedCornerShape(8.dp))
+                .border(0.7.dp, if (uiState.isMasterEnabled) NeonCyan else DarkBorder, RoundedCornerShape(8.dp))
+                .padding(8.dp)
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Column {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Box(
-                            modifier = Modifier
-                                .width(8.dp)
-                                .height(8.dp)
-                                .background(
-                                    if (uiState.isMasterEnabled) EmeraldActive else DarkTextSecondary,
-                                    RoundedCornerShape(4.dp)
-                                )
-                        )
-                        Spacer(modifier = Modifier.width(6.dp))
-                        Text(
-                            text = if (uiState.isMasterEnabled) "DSP SURGICAL ACTIVO" else "DSP EN BYPASS",
-                            fontFamily = FontFamily.Monospace,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 11.sp,
-                            color = if (uiState.isMasterEnabled) EmeraldActive else DarkTextSecondary
-                        )
-                    }
-                    Spacer(modifier = Modifier.height(2.dp))
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Box(
+                        modifier = Modifier
+                            .width(6.dp)
+                            .height(6.dp)
+                            .background(
+                                if (uiState.isMasterEnabled) EmeraldActive else DarkTextSecondary,
+                                RoundedCornerShape(3.dp)
+                            )
+                    )
+                    Spacer(modifier = Modifier.width(5.dp))
                     Text(
-                        text = "HTC NE76 Acoustic Tuning",
-                        style = MaterialTheme.typography.titleMedium,
-                        color = DarkTextPrimary
+                        text = if (uiState.isMasterEnabled) "DSP SURGICAL ACTIVO" else "BYPASS (APAGADO)",
+                        fontFamily = FontFamily.Monospace,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 9.sp,
+                        color = if (uiState.isMasterEnabled) EmeraldActive else DarkTextSecondary
                     )
                 }
 
                 Switch(
                     checked = uiState.isMasterEnabled,
                     onCheckedChange = { viewModel.setMasterEnabled(it) },
+                    modifier = Modifier.height(24.dp),
                     colors = SwitchDefaults.colors(
                         checkedThumbColor = Color.Black,
                         checkedTrackColor = NeonCyan,
@@ -130,9 +124,9 @@ fun EqualizerScreen(
                 )
             }
 
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(6.dp))
 
-            // Selector de Presets
+            // Presets
             PresetBar(
                 presets = uiState.allPresets,
                 selectedPresetId = uiState.selectedPresetId,
@@ -142,67 +136,92 @@ fun EqualizerScreen(
             )
         }
 
-        // 2. Gráfico Interactivo de Respuesta en Frecuencia (Canvas)
+        // 2. Gráfico Interactivo de Curva de Frecuencia
         FrequencyCurveCanvas(
             bands = uiState.bands,
             isEnabled = uiState.isMasterEnabled
         )
 
-        // 3. Bandas Quirúrgicas Paramétricas (Sliders + Cajas numéricas exactas)
-        Text(
-            text = "BANDAS PARAMÉTRICAS QUIRÚRGICAS",
-            style = MaterialTheme.typography.labelSmall.copy(
-                letterSpacing = 1.sp,
-                color = NeonCyan
-            )
-        )
+        // 3. CONSOLA DE FADERS ESTUDIO (6 Bandas en Paralelo)
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(DarkSurface, RoundedCornerShape(8.dp))
+                .border(0.7.dp, DarkBorder, RoundedCornerShape(8.dp))
+                .padding(6.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "CONSOLA DE BANDAS",
+                    fontFamily = FontFamily.Monospace,
+                    fontSize = 8.5.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = DarkTextSecondary
+                )
+                Text(
+                    text = "Toca un fader para ajuste fino",
+                    fontSize = 8.5.sp,
+                    color = DarkTextSecondary
+                )
+            }
 
-        val bandDescriptions = listOf(
-            "SUB-GRAVES (Pegada profunda y retumbe limpio)",
-            "GRAVES MEDIOS (Cuerpo de bombo y bajo)",
-            "MEDIOS-GRAVES (Anti-encajonado y claridad vocal)",
-            "MEDIOS (Presencia vocal y guitarras)",
-            "AGUDOS / PRESENCIA (Detalle y articulación)",
-            "AIRE / BRILLO SUPERIOR (Extensión cristalina sin fatiga)"
-        )
+            Spacer(modifier = Modifier.height(4.dp))
 
-        uiState.bands.forEachIndexed { index, band ->
-            val description = bandDescriptions.getOrElse(index) { "BANDA ${index + 1}" }
+            // Faders verticales lado a lado (todos visibles sin scroll)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                uiState.bands.forEachIndexed { idx, band ->
+                    VerticalFader(
+                        band = band,
+                        isSelected = selectedBandIndex == idx,
+                        onGainChanged = { newGain ->
+                            viewModel.updateBand(band.index, band.frequencyHz, newGain, band.qFactor)
+                        },
+                        onSelected = {
+                            selectedBandIndex = idx
+                        },
+                        isEnabled = uiState.isMasterEnabled,
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+            }
+        }
 
+        // 4. Panel de Ajuste Fino Numérico para la Banda Seleccionada
+        val activeBand = uiState.bands.getOrNull(selectedBandIndex)
+        if (activeBand != null) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(DarkSurface, RoundedCornerShape(12.dp))
-                    .border(1.dp, DarkBorder, RoundedCornerShape(12.dp))
-                    .padding(12.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+                    .background(DarkSurface, RoundedCornerShape(8.dp))
+                    .border(0.7.dp, NeonCyan.copy(alpha = 0.5f), RoundedCornerShape(8.dp))
+                    .padding(8.dp),
+                verticalArrangement = Arrangement.spacedBy(5.dp)
             ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Column {
-                        Text(
-                            text = "BANDA ${index + 1}",
-                            fontFamily = FontFamily.Monospace,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 11.sp,
-                            color = ElectricBlue
-                        )
-                        Text(
-                            text = description,
-                            style = MaterialTheme.typography.bodyMedium.copy(
-                                fontSize = 11.sp,
-                                color = DarkTextSecondary
-                            )
-                        )
-                    }
+                    Text(
+                        text = "AJUSTE QUIRÚRGICO • BANDA ${selectedBandIndex + 1} (${activeBand.frequencyHz.toInt()} Hz)",
+                        fontFamily = FontFamily.Monospace,
+                        fontSize = 9.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = NeonCyan
+                    )
 
                     Switch(
-                        checked = band.isEnabled,
-                        onCheckedChange = { viewModel.toggleBandEnabled(band.index) },
+                        checked = activeBand.isEnabled,
+                        onCheckedChange = { viewModel.toggleBandEnabled(activeBand.index) },
                         enabled = uiState.isMasterEnabled,
+                        modifier = Modifier.height(20.dp),
                         colors = SwitchDefaults.colors(
                             checkedThumbColor = Color.Black,
                             checkedTrackColor = ElectricBlue,
@@ -212,139 +231,143 @@ fun EqualizerScreen(
                     )
                 }
 
-                // Control Híbrido 1: Ganancia (dB) con decimales exactos
+                // Control Ganancia exacta
                 HybridSliderField(
-                    title = "Ganancia",
-                    value = band.gainDb,
-                    onValueChange = { newGain ->
-                        viewModel.updateBand(band.index, band.frequencyHz, newGain, band.qFactor)
-                    },
+                    title = "Ganancia de Banda",
+                    value = activeBand.gainDb,
+                    onValueChange = { viewModel.updateBand(activeBand.index, activeBand.frequencyHz, it, activeBand.qFactor) },
                     range = -15.0f..15.0f,
                     unit = "dB",
                     decimalPlaces = 1,
                     accentColor = NeonCyan,
-                    enabled = uiState.isMasterEnabled && band.isEnabled
+                    enabled = uiState.isMasterEnabled && activeBand.isEnabled
                 )
 
-                // Control Híbrido 2: Frecuencia Central (Hz) exacta
+                // Control Frecuencia exacta
                 HybridSliderField(
-                    title = "Frecuencia Central",
-                    value = band.frequencyHz,
-                    onValueChange = { newFreq ->
-                        viewModel.updateBand(band.index, newFreq, band.gainDb, band.qFactor)
-                    },
+                    title = "Frecuencia Central Exacta",
+                    value = activeBand.frequencyHz,
+                    onValueChange = { viewModel.updateBand(activeBand.index, it, activeBand.gainDb, activeBand.qFactor) },
                     range = 20.0f..20000.0f,
                     unit = "Hz",
                     decimalPlaces = 0,
                     accentColor = ElectricBlue,
-                    enabled = uiState.isMasterEnabled && band.isEnabled
+                    enabled = uiState.isMasterEnabled && activeBand.isEnabled
                 )
 
-                // Control Híbrido 3: Factor Q (Ancho de banda) exacto
+                // Control Factor Q exacto
                 HybridSliderField(
-                    title = "Factor Q (Ancho de Campana)",
-                    value = band.qFactor,
-                    onValueChange = { newQ ->
-                        viewModel.updateBand(band.index, band.frequencyHz, band.gainDb, newQ)
-                    },
+                    title = "Ancho de Campana (Factor Q)",
+                    value = activeBand.qFactor,
+                    onValueChange = { viewModel.updateBand(activeBand.index, activeBand.frequencyHz, activeBand.gainDb, it) },
                     range = 0.30f..5.00f,
                     unit = "Q",
                     decimalPlaces = 2,
                     accentColor = CyberAmber,
-                    enabled = uiState.isMasterEnabled && band.isEnabled
+                    enabled = uiState.isMasterEnabled && activeBand.isEnabled
                 )
             }
         }
 
-        // 4. Etapa DSP de Efectos, Dinámica y Limitador
-        Text(
-            text = "PROCESAMIENTO DINÁMICO & EFECTOS HTC NE76",
-            style = MaterialTheme.typography.labelSmall.copy(
-                letterSpacing = 1.sp,
-                color = CyberAmber
-            )
-        )
-
+        // 5. Rack de Efectos Dinámicos en Grid 2x2 Compacto
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(DarkSurface, RoundedCornerShape(12.dp))
-                .border(1.dp, DarkBorder, RoundedCornerShape(12.dp))
-                .padding(12.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp)
+                .background(DarkSurface, RoundedCornerShape(8.dp))
+                .border(0.7.dp, DarkBorder, RoundedCornerShape(8.dp))
+                .padding(8.dp),
+            verticalArrangement = Arrangement.spacedBy(6.dp)
         ) {
-            // Bass Boost Híbrido
-            HybridSliderField(
-                title = "Bass Boost (Refuerzo de Graves)",
-                value = uiState.bassBoost.toFloat(),
-                onValueChange = { viewModel.setBassBoost(it.toInt()) },
-                range = 0f..1000f,
-                unit = "pts",
-                decimalPlaces = 0,
-                accentColor = NeonCyan,
-                enabled = uiState.isMasterEnabled
-            )
-
-            // Loudness Enhancer Híbrido
-            HybridSliderField(
-                title = "Loudness Enhancer (Realce Acústico)",
-                value = uiState.loudnessDb,
-                onValueChange = { viewModel.setLoudnessDb(it) },
-                range = 0.0f..15.0f,
-                unit = "dB",
-                decimalPlaces = 1,
-                accentColor = ElectricBlue,
-                enabled = uiState.isMasterEnabled
-            )
-
-            // Virtualizer / 3D Espacializador
-            HybridSliderField(
-                title = "Espacializador Virtual 3D",
-                value = uiState.virtualizer.toFloat(),
-                onValueChange = { viewModel.setVirtualizer(it.toInt()) },
-                range = 0f..1000f,
-                unit = "pts",
-                decimalPlaces = 0,
-                accentColor = AcidPink,
-                enabled = uiState.isMasterEnabled
-            )
-
-            // Pre-Amp Gain / Headroom
-            HybridSliderField(
-                title = "Ganancia Pre-Amp (Headroom Limitador)",
-                value = uiState.preAmpDb,
-                onValueChange = { viewModel.setPreAmpDb(it) },
-                range = -15.0f..15.0f,
-                unit = "dB",
-                decimalPlaces = 1,
-                accentColor = CyberAmber,
-                enabled = uiState.isMasterEnabled
+            Text(
+                text = "RACK DE EFECTOS DSP",
+                fontFamily = FontFamily.Monospace,
+                fontSize = 8.5.sp,
+                fontWeight = FontWeight.Bold,
+                color = DarkTextSecondary
             )
 
             Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                HybridSliderField(
+                    title = "Bass Boost",
+                    value = uiState.bassBoost.toFloat(),
+                    onValueChange = { viewModel.setBassBoost(it.toInt()) },
+                    range = 0f..1000f,
+                    unit = "",
+                    decimalPlaces = 0,
+                    accentColor = NeonCyan,
+                    enabled = uiState.isMasterEnabled,
+                    modifier = Modifier.weight(1f)
+                )
+
+                HybridSliderField(
+                    title = "Loudness",
+                    value = uiState.loudnessDb,
+                    onValueChange = { viewModel.setLoudnessDb(it) },
+                    range = 0.0f..15.0f,
+                    unit = "dB",
+                    decimalPlaces = 1,
+                    accentColor = ElectricBlue,
+                    enabled = uiState.isMasterEnabled,
+                    modifier = Modifier.weight(1f)
+                )
+            }
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                HybridSliderField(
+                    title = "Espacializador 3D",
+                    value = uiState.virtualizer.toFloat(),
+                    onValueChange = { viewModel.setVirtualizer(it.toInt()) },
+                    range = 0f..1000f,
+                    unit = "",
+                    decimalPlaces = 0,
+                    accentColor = AcidPink,
+                    enabled = uiState.isMasterEnabled,
+                    modifier = Modifier.weight(1f)
+                )
+
+                HybridSliderField(
+                    title = "Pre-Amp / Limiter",
+                    value = uiState.preAmpDb,
+                    onValueChange = { viewModel.setPreAmpDb(it) },
+                    range = -15.0f..15.0f,
+                    unit = "dB",
+                    decimalPlaces = 1,
+                    accentColor = CyberAmber,
+                    enabled = uiState.isMasterEnabled,
+                    modifier = Modifier.weight(1f)
+                )
+            }
+
+            // Diagnóstico de motor de audio
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(Color.Black, RoundedCornerShape(8.dp))
-                    .padding(10.dp),
-                verticalAlignment = Alignment.CenterVertically
+                    .background(Color.Black, RoundedCornerShape(5.dp))
+                    .padding(horizontal = 6.dp, vertical = 4.dp)
             ) {
                 Box(
                     modifier = Modifier
-                        .width(8.dp)
-                        .height(8.dp)
-                        .background(EmeraldActive, RoundedCornerShape(4.dp))
+                        .width(5.dp)
+                        .height(5.dp)
+                        .background(EmeraldActive, RoundedCornerShape(2.5.dp))
                 )
-                Spacer(modifier = Modifier.width(8.dp))
+                Spacer(modifier = Modifier.width(6.dp))
                 Text(
-                    text = "DynamicsProcessing Limiter Activo: Protección contra distorsión y clipping inter-sample en picos altos.",
-                    style = MaterialTheme.typography.bodyMedium.copy(
-                        fontSize = 11.sp,
-                        color = DarkTextSecondary
-                    )
+                    text = "Motor Híbrido: DynamicsProcessing + Universal AudioFX (Prioridad 1000)",
+                    fontFamily = FontFamily.Monospace,
+                    fontSize = 8.sp,
+                    color = DarkTextSecondary
                 )
             }
         }
 
-        Spacer(modifier = Modifier.height(20.dp))
+        Spacer(modifier = Modifier.height(10.dp))
     }
 }

@@ -10,49 +10,49 @@ val Typography = Typography(
     headlineLarge = TextStyle(
         fontFamily = FontFamily.SansSerif,
         fontWeight = FontWeight.Bold,
-        fontSize = 26.sp,
-        lineHeight = 32.sp,
+        fontSize = 18.sp,
+        lineHeight = 22.sp,
         letterSpacing = 0.sp,
         color = DarkTextPrimary
     ),
     headlineMedium = TextStyle(
         fontFamily = FontFamily.SansSerif,
         fontWeight = FontWeight.SemiBold,
-        fontSize = 20.sp,
-        lineHeight = 26.sp,
+        fontSize = 15.sp,
+        lineHeight = 19.sp,
         letterSpacing = 0.sp,
         color = DarkTextPrimary
     ),
     titleMedium = TextStyle(
         fontFamily = FontFamily.SansSerif,
         fontWeight = FontWeight.SemiBold,
-        fontSize = 15.sp,
-        lineHeight = 20.sp,
-        letterSpacing = 0.15.sp,
+        fontSize = 13.sp,
+        lineHeight = 17.sp,
+        letterSpacing = 0.1.sp,
         color = DarkTextPrimary
     ),
     bodyLarge = TextStyle(
         fontFamily = FontFamily.SansSerif,
         fontWeight = FontWeight.Normal,
-        fontSize = 14.sp,
-        lineHeight = 20.sp,
-        letterSpacing = 0.25.sp,
+        fontSize = 12.sp,
+        lineHeight = 16.sp,
+        letterSpacing = 0.2.sp,
         color = DarkTextPrimary
     ),
     bodyMedium = TextStyle(
         fontFamily = FontFamily.SansSerif,
         fontWeight = FontWeight.Normal,
-        fontSize = 12.sp,
-        lineHeight = 16.sp,
-        letterSpacing = 0.25.sp,
+        fontSize = 10.5.sp,
+        lineHeight = 14.sp,
+        letterSpacing = 0.2.sp,
         color = DarkTextSecondary
     ),
     labelSmall = TextStyle(
         fontFamily = FontFamily.Monospace,
         fontWeight = FontWeight.Medium,
-        fontSize = 11.sp,
-        lineHeight = 14.sp,
-        letterSpacing = 0.5.sp,
+        fontSize = 9.sp,
+        lineHeight = 12.sp,
+        letterSpacing = 0.4.sp,
         color = NeonCyan
     )
 )

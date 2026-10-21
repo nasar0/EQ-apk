@@ -23,7 +23,6 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
@@ -35,7 +34,6 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.surgical.eq.htcne76.ui.theme.DarkBorder
 import com.surgical.eq.htcne76.ui.theme.DarkSurfaceVariant
 import com.surgical.eq.htcne76.ui.theme.DarkTextPrimary
 import com.surgical.eq.htcne76.ui.theme.DarkTextSecondary
@@ -64,9 +62,9 @@ fun UpdateNotificationBanner(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(DarkSurfaceVariant, RoundedCornerShape(12.dp))
-                .border(1.dp, NeonCyan, RoundedCornerShape(12.dp))
-                .padding(14.dp)
+                .background(DarkSurfaceVariant, RoundedCornerShape(8.dp))
+                .border(0.7.dp, NeonCyan, RoundedCornerShape(8.dp))
+                .padding(8.dp)
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -76,50 +74,50 @@ fun UpdateNotificationBanner(
                     imageVector = Icons.Default.SystemUpdate,
                     contentDescription = "Actualización",
                     tint = NeonCyan,
-                    modifier = Modifier.size(24.dp)
+                    modifier = Modifier.size(16.dp)
                 )
 
-                Spacer(modifier = Modifier.width(10.dp))
+                Spacer(modifier = Modifier.width(6.dp))
 
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = if (isDownloading) "Descargando actualización..." else "¡NUEVA ACTUALIZACIÓN DISPONIBLE!",
+                        text = if (isDownloading) "DESCARGANDO ACTUALIZACIÓN..." else "NUEVA VERSIÓN DISPONIBLE",
                         fontFamily = FontFamily.Monospace,
                         fontWeight = FontWeight.Bold,
-                        fontSize = 12.sp,
+                        fontSize = 9.sp,
                         color = NeonCyan
                     )
-                    Spacer(modifier = Modifier.height(2.dp))
                     Text(
-                        text = if (isDownloading) "$downloadProgress%" else "${updateInfo?.tagName ?: ""} • Generada automáticamente por GitHub CI/CD",
-                        style = MaterialTheme.typography.bodyMedium.copy(fontSize = 11.sp),
+                        text = if (isDownloading) "$downloadProgress%" else "${updateInfo?.tagName ?: ""} • Generada por CI/CD",
+                        fontSize = 8.5.sp,
                         color = DarkTextPrimary
                     )
                 }
 
                 if (!isDownloading) {
-                    IconButton(onClick = onDismiss, modifier = Modifier.size(20.dp)) {
+                    IconButton(onClick = onDismiss, modifier = Modifier.size(18.dp)) {
                         Icon(
                             imageVector = Icons.Default.Close,
                             contentDescription = "Cerrar",
-                            tint = DarkTextSecondary
+                            tint = DarkTextSecondary,
+                            modifier = Modifier.size(12.dp)
                         )
                     }
                 }
             }
 
             if (isDownloading) {
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(4.dp))
                 LinearProgressIndicator(
                     progress = { downloadProgress / 100f },
                     color = NeonCyan,
                     trackColor = Color.Black,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(6.dp)
+                        .height(4.dp)
                 )
             } else if (updateInfo != null) {
-                Spacer(modifier = Modifier.height(10.dp))
+                Spacer(modifier = Modifier.height(6.dp))
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.End
@@ -133,9 +131,10 @@ fun UpdateNotificationBanner(
                         colors = ButtonDefaults.buttonColors(
                             containerColor = NeonCyan,
                             contentColor = Color.Black
-                        )
+                        ),
+                        modifier = Modifier.height(26.dp)
                     ) {
-                        Text("Actualizar Ahora")
+                        Text("Actualizar Ahora", fontSize = 9.sp, fontWeight = FontWeight.Bold)
                     }
                 }
             }

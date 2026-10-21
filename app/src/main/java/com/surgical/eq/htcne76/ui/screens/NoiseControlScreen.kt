@@ -22,7 +22,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
@@ -89,91 +88,85 @@ fun NoiseControlScreen(
             .fillMaxSize()
             .background(OledBlack)
             .verticalScroll(scrollState)
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+            .padding(horizontal = 10.dp, vertical = 8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        // Banner de permisos de micrófono si no están concedidos
         if (!hasMicPermission) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(Color(0xFF1E1400), RoundedCornerShape(12.dp))
-                    .border(1.dp, CyberAmber, RoundedCornerShape(12.dp))
-                    .padding(12.dp)
+                    .background(Color(0xFF1E1400), RoundedCornerShape(8.dp))
+                    .border(0.7.dp, CyberAmber, RoundedCornerShape(8.dp))
+                    .padding(8.dp)
             ) {
                 Text(
                     text = "PERMISO DE MICRÓFONO REQUERIDO",
-                    style = MaterialTheme.typography.titleMedium,
+                    fontFamily = FontFamily.Monospace,
+                    fontSize = 9.5.sp,
+                    fontWeight = FontWeight.Bold,
                     color = CyberAmber
                 )
-                Spacer(modifier = Modifier.height(4.dp))
+                Spacer(modifier = Modifier.height(2.dp))
                 Text(
-                    text = "Para capturar el ruido exterior, calcular la inversión de fase y medir los decibelios en tiempo real, la app requiere acceso al micrófono.",
-                    style = MaterialTheme.typography.bodyMedium,
+                    text = "Necesario para capturar audio exterior y calcular la onda anti-ruido invertida.",
+                    fontSize = 9.sp,
                     color = DarkTextPrimary
                 )
-                Spacer(modifier = Modifier.height(10.dp))
+                Spacer(modifier = Modifier.height(6.dp))
                 Button(
                     onClick = { permissionLauncher.launch(Manifest.permission.RECORD_AUDIO) },
                     colors = ButtonDefaults.buttonColors(
                         containerColor = CyberAmber,
                         contentColor = Color.Black
-                    )
+                    ),
+                    modifier = Modifier.height(26.dp)
                 ) {
-                    Text("Conceder Permiso")
+                    Text("Conceder Permiso", fontSize = 9.sp)
                 }
             }
         }
 
-        // 1. Sonómetro de ruido en tiempo real
+        // 1. Sonómetro Compacto
         DecibelMeterView(
             ambientDb = uiState.ambientDb,
             isMicActive = hasMicPermission && (config.phaseInversionEnabled || config.smartMaskingEnabled)
         )
 
-        // 2. MODO 1: ANC Experimental por Inversión de Fase (Phase Inversion)
+        // 2. MODO 1: ANC por Inversión de Fase
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(DarkSurface, RoundedCornerShape(14.dp))
+                .background(DarkSurface, RoundedCornerShape(8.dp))
                 .border(
-                    1.dp,
+                    0.7.dp,
                     if (config.phaseInversionEnabled) NeonCyan else DarkBorder,
-                    RoundedCornerShape(14.dp)
+                    RoundedCornerShape(8.dp)
                 )
-                .padding(14.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp)
+                .padding(8.dp),
+            verticalArrangement = Arrangement.spacedBy(6.dp)
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Column {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Box(
-                            modifier = Modifier
-                                .width(8.dp)
-                                .height(8.dp)
-                                .background(
-                                    if (config.phaseInversionEnabled) EmeraldActive else DarkTextSecondary,
-                                    RoundedCornerShape(4.dp)
-                                )
-                        )
-                        Spacer(modifier = Modifier.width(6.dp))
-                        Text(
-                            text = "MODO 1: ANC POR INVERSIÓN DE FASE",
-                            fontFamily = FontFamily.Monospace,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 11.sp,
-                            color = if (config.phaseInversionEnabled) NeonCyan else DarkTextSecondary
-                        )
-                    }
-                    Spacer(modifier = Modifier.height(2.dp))
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Box(
+                        modifier = Modifier
+                            .width(5.dp)
+                            .height(5.dp)
+                            .background(
+                                if (config.phaseInversionEnabled) EmeraldActive else DarkTextSecondary,
+                                RoundedCornerShape(2.5.dp)
+                            )
+                    )
+                    Spacer(modifier = Modifier.width(5.dp))
                     Text(
-                        text = "Cancelación Acústica Destructiva",
-                        style = MaterialTheme.typography.titleMedium,
-                        color = DarkTextPrimary
+                        text = "MODO 1: ANC INVERSIÓN DE FASE",
+                        fontFamily = FontFamily.Monospace,
+                        fontSize = 9.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = if (config.phaseInversionEnabled) NeonCyan else DarkTextSecondary
                     )
                 }
 
@@ -186,6 +179,7 @@ fun NoiseControlScreen(
                             viewModel.updateNoiseControlConfig(config.copy(phaseInversionEnabled = isEnabled))
                         }
                     },
+                    modifier = Modifier.height(22.dp),
                     colors = SwitchDefaults.colors(
                         checkedThumbColor = Color.Black,
                         checkedTrackColor = NeonCyan,
@@ -195,23 +189,17 @@ fun NoiseControlScreen(
                 )
             }
 
-            // Explicación técnica para el usuario
             Text(
-                text = "Captura el ruido por el micrófono, filtra frecuencias largas (< 600 Hz) e invierte la polaridad (180°). Ajusta el desfase milisegundo a milisegundo hasta anular el zumbido exterior con la latencia de tus HTC NE76.",
-                style = MaterialTheme.typography.bodyMedium.copy(
-                    fontSize = 11.sp,
-                    color = DarkTextSecondary
-                )
+                text = "Invierte la onda PCM exterior (< 600 Hz). Calibra los milisegundos de desfase para sincronizar con la latencia Bluetooth de tus HTC NE76.",
+                fontSize = 8.5.sp,
+                color = DarkTextSecondary
             )
 
-            // Control Híbrido: Compensación de Latencia y Desfase Bluetooth (ms y muestras)
             val samplesCount = ((config.phaseDelayMs * 48000f) / 1000f).roundToInt()
             HybridSliderField(
-                title = "Compensación Latencia / Fase ($samplesCount muestras)",
+                title = "Compensación de Fase ($samplesCount muestras)",
                 value = config.phaseDelayMs,
-                onValueChange = { newMs ->
-                    viewModel.updateNoiseControlConfig(config.copy(phaseDelayMs = newMs))
-                },
+                onValueChange = { viewModel.updateNoiseControlConfig(config.copy(phaseDelayMs = it)) },
                 range = 0.0f..50.0f,
                 unit = "ms",
                 decimalPlaces = 1,
@@ -219,78 +207,71 @@ fun NoiseControlScreen(
                 enabled = config.phaseInversionEnabled
             )
 
-            // Control Híbrido: Filtro Paso-Bajo (< 600 Hz)
-            HybridSliderField(
-                title = "Frecuencia de Corte ANC (< 600 Hz)",
-                value = config.lowPassCutoffHz,
-                onValueChange = { newHz ->
-                    viewModel.updateNoiseControlConfig(config.copy(lowPassCutoffHz = newHz))
-                },
-                range = 50.0f..600.0f,
-                unit = "Hz",
-                decimalPlaces = 0,
-                accentColor = ElectricBlue,
-                enabled = config.phaseInversionEnabled
-            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                HybridSliderField(
+                    title = "Corte ANC (<600Hz)",
+                    value = config.lowPassCutoffHz,
+                    onValueChange = { viewModel.updateNoiseControlConfig(config.copy(lowPassCutoffHz = it)) },
+                    range = 50.0f..600.0f,
+                    unit = "Hz",
+                    decimalPlaces = 0,
+                    accentColor = ElectricBlue,
+                    enabled = config.phaseInversionEnabled,
+                    modifier = Modifier.weight(1f)
+                )
 
-            // Control Híbrido: Ganancia de Inversión
-            HybridSliderField(
-                title = "Ganancia de Onda Anti-Ruido",
-                value = config.inversionGain,
-                onValueChange = { newGain ->
-                    viewModel.updateNoiseControlConfig(config.copy(inversionGain = newGain))
-                },
-                range = 0.0f..1.50f,
-                unit = "x",
-                decimalPlaces = 2,
-                accentColor = CyberAmber,
-                enabled = config.phaseInversionEnabled
-            )
+                HybridSliderField(
+                    title = "Ganancia Anti-Ruido",
+                    value = config.inversionGain,
+                    onValueChange = { viewModel.updateNoiseControlConfig(config.copy(inversionGain = it)) },
+                    range = 0.0f..1.50f,
+                    unit = "x",
+                    decimalPlaces = 2,
+                    accentColor = CyberAmber,
+                    enabled = config.phaseInversionEnabled,
+                    modifier = Modifier.weight(1f)
+                )
+            }
         }
 
-        // 3. MODO 2: Enmascaramiento Psicoacústico Inteligente (Smart Noise Masking)
+        // 3. MODO 2: Enmascaramiento Psicoacústico Inteligente
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(DarkSurface, RoundedCornerShape(14.dp))
+                .background(DarkSurface, RoundedCornerShape(8.dp))
                 .border(
-                    1.dp,
+                    0.7.dp,
                     if (config.smartMaskingEnabled) ElectricBlue else DarkBorder,
-                    RoundedCornerShape(14.dp)
+                    RoundedCornerShape(8.dp)
                 )
-                .padding(14.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp)
+                .padding(8.dp),
+            verticalArrangement = Arrangement.spacedBy(6.dp)
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Column {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Box(
-                            modifier = Modifier
-                                .width(8.dp)
-                                .height(8.dp)
-                                .background(
-                                    if (config.smartMaskingEnabled) EmeraldActive else DarkTextSecondary,
-                                    RoundedCornerShape(4.dp)
-                                )
-                        )
-                        Spacer(modifier = Modifier.width(6.dp))
-                        Text(
-                            text = "MODO 2: ENMASCARAMIENTO PSICOACÚSTICO",
-                            fontFamily = FontFamily.Monospace,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 11.sp,
-                            color = if (config.smartMaskingEnabled) ElectricBlue else DarkTextSecondary
-                        )
-                    }
-                    Spacer(modifier = Modifier.height(2.dp))
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Box(
+                        modifier = Modifier
+                            .width(5.dp)
+                            .height(5.dp)
+                            .background(
+                                if (config.smartMaskingEnabled) EmeraldActive else DarkTextSecondary,
+                                RoundedCornerShape(2.5.dp)
+                            )
+                    )
+                    Spacer(modifier = Modifier.width(5.dp))
                     Text(
-                        text = "Aislamiento Orgánico para Dormir",
-                        style = MaterialTheme.typography.titleMedium,
-                        color = DarkTextPrimary
+                        text = "MODO 2: ENMASCARAMIENTO PSICOACÚSTICO",
+                        fontFamily = FontFamily.Monospace,
+                        fontSize = 9.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = if (config.smartMaskingEnabled) ElectricBlue else DarkTextSecondary
                     )
                 }
 
@@ -299,6 +280,7 @@ fun NoiseControlScreen(
                     onCheckedChange = { isEnabled ->
                         viewModel.updateNoiseControlConfig(config.copy(smartMaskingEnabled = isEnabled))
                     },
+                    modifier = Modifier.height(22.dp),
                     colors = SwitchDefaults.colors(
                         checkedThumbColor = Color.Black,
                         checkedTrackColor = ElectricBlue,
@@ -308,28 +290,15 @@ fun NoiseControlScreen(
                 )
             }
 
-            Text(
-                text = "Genera una capa sintetizada de frecuencias armónicas (Ruido Marrón o Rosa) que neutraliza la percepción cerebral de voces, ladridos o ruidos súbitos de la casa mientras duermes.",
-                style = MaterialTheme.typography.bodyMedium.copy(
-                    fontSize = 11.sp,
-                    color = DarkTextSecondary
-                )
-            )
-
-            // Selector de Perfil de Ruido (Marrón, Rosa, Híbrido)
-            Text(
-                text = "Perfil Espectral de Ruido:",
-                style = MaterialTheme.typography.labelSmall.copy(color = DarkTextSecondary)
-            )
-
+            // Selector compacto de Ruido
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                horizontalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 listOf(
                     Triple("BROWN", "Marrón", "Graves/Ronquidos"),
-                    Triple("PINK", "Rosa", "Voces/Conversación"),
-                    Triple("HYBRID", "Híbrido", "Balance Máximo")
+                    Triple("PINK", "Rosa", "Voces/Casa"),
+                    Triple("HYBRID", "Híbrido", "Balance")
                 ).forEach { (type, label, desc) ->
                     val isSelected = config.noiseType == type
 
@@ -338,108 +307,98 @@ fun NoiseControlScreen(
                             .weight(1f)
                             .background(
                                 if (isSelected) NeonCyanDim else DarkSurfaceVariant,
-                                RoundedCornerShape(10.dp)
+                                RoundedCornerShape(6.dp)
                             )
                             .border(
-                                1.dp,
+                                0.7.dp,
                                 if (isSelected) ElectricBlue else DarkBorder,
-                                RoundedCornerShape(10.dp)
+                                RoundedCornerShape(6.dp)
                             )
-                            .clickable {
-                                viewModel.updateNoiseControlConfig(config.copy(noiseType = type))
-                            }
-                            .padding(8.dp),
+                            .clickable { viewModel.updateNoiseControlConfig(config.copy(noiseType = type)) }
+                            .padding(4.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Text(
                             text = label,
                             fontFamily = FontFamily.Monospace,
                             fontWeight = FontWeight.Bold,
-                            fontSize = 12.sp,
+                            fontSize = 9.5.sp,
                             color = if (isSelected) ElectricBlue else DarkTextPrimary
                         )
-                        Spacer(modifier = Modifier.height(2.dp))
                         Text(
                             text = desc,
-                            fontSize = 9.sp,
+                            fontSize = 7.5.sp,
                             color = DarkTextSecondary
                         )
                     }
                 }
             }
 
-            // Control Híbrido: Umbral dB de activación inteligente
-            HybridSliderField(
-                title = "Umbral de Activación Ambiental",
-                value = config.ambientThresholdDb,
-                onValueChange = { newThreshold ->
-                    viewModel.updateNoiseControlConfig(config.copy(ambientThresholdDb = newThreshold))
-                },
-                range = 30.0f..80.0f,
-                unit = "dB",
-                decimalPlaces = 1,
-                accentColor = ElectricBlue,
-                enabled = config.smartMaskingEnabled
-            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                HybridSliderField(
+                    title = "Umbral Activación",
+                    value = config.ambientThresholdDb,
+                    onValueChange = { viewModel.updateNoiseControlConfig(config.copy(ambientThresholdDb = it)) },
+                    range = 30.0f..80.0f,
+                    unit = "dB",
+                    decimalPlaces = 1,
+                    accentColor = ElectricBlue,
+                    enabled = config.smartMaskingEnabled,
+                    modifier = Modifier.weight(1f)
+                )
 
-            // Control Híbrido: Volumen máximo de la capa de enmascaramiento
-            HybridSliderField(
-                title = "Volumen Máximo de Máscara Acústica",
-                value = config.maskingMaxGain * 100f,
-                onValueChange = { newPct ->
-                    viewModel.updateNoiseControlConfig(config.copy(maskingMaxGain = newPct / 100f))
-                },
-                range = 5.0f..100.0f,
-                unit = "%",
-                decimalPlaces = 0,
-                accentColor = AcidPink,
-                enabled = config.smartMaskingEnabled
-            )
+                HybridSliderField(
+                    title = "Volumen Máximo",
+                    value = config.maskingMaxGain * 100f,
+                    onValueChange = { viewModel.updateNoiseControlConfig(config.copy(maskingMaxGain = it / 100f)) },
+                    range = 5.0f..100.0f,
+                    unit = "%",
+                    decimalPlaces = 0,
+                    accentColor = AcidPink,
+                    enabled = config.smartMaskingEnabled,
+                    modifier = Modifier.weight(1f)
+                )
+            }
         }
 
-        // 4. MODO 3: Limpieza de Ruido en Audio Reproducido (DSP Noise Gate & Sub-hum Filter)
+        // 4. MODO 3: Limpieza DSP & Anti-Hiss
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(DarkSurface, RoundedCornerShape(14.dp))
+                .background(DarkSurface, RoundedCornerShape(8.dp))
                 .border(
-                    1.dp,
+                    0.7.dp,
                     if (config.dspNoiseGateEnabled) CyberAmber else DarkBorder,
-                    RoundedCornerShape(14.dp)
+                    RoundedCornerShape(8.dp)
                 )
-                .padding(14.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp)
+                .padding(8.dp),
+            verticalArrangement = Arrangement.spacedBy(6.dp)
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Column {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Box(
-                            modifier = Modifier
-                                .width(8.dp)
-                                .height(8.dp)
-                                .background(
-                                    if (config.dspNoiseGateEnabled) EmeraldActive else DarkTextSecondary,
-                                    RoundedCornerShape(4.dp)
-                                )
-                        )
-                        Spacer(modifier = Modifier.width(6.dp))
-                        Text(
-                            text = "MODO 3: LIMPIEZA DSP & ANTI-SISEO",
-                            fontFamily = FontFamily.Monospace,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 11.sp,
-                            color = if (config.dspNoiseGateEnabled) CyberAmber else DarkTextSecondary
-                        )
-                    }
-                    Spacer(modifier = Modifier.height(2.dp))
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Box(
+                        modifier = Modifier
+                            .width(5.dp)
+                            .height(5.dp)
+                            .background(
+                                if (config.dspNoiseGateEnabled) EmeraldActive else DarkTextSecondary,
+                                RoundedCornerShape(2.5.dp)
+                            )
+                    )
+                    Spacer(modifier = Modifier.width(5.dp))
                     Text(
-                        text = "Filtro Sub-hum & Noise Gate",
-                        style = MaterialTheme.typography.titleMedium,
-                        color = DarkTextPrimary
+                        text = "MODO 3: LIMPIEZA DSP & ANTI-SISEO",
+                        fontFamily = FontFamily.Monospace,
+                        fontSize = 9.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = if (config.dspNoiseGateEnabled) CyberAmber else DarkTextSecondary
                     )
                 }
 
@@ -448,6 +407,7 @@ fun NoiseControlScreen(
                     onCheckedChange = { isEnabled ->
                         viewModel.updateNoiseControlConfig(config.copy(dspNoiseGateEnabled = isEnabled))
                     },
+                    modifier = Modifier.height(22.dp),
                     colors = SwitchDefaults.colors(
                         checkedThumbColor = Color.Black,
                         checkedTrackColor = CyberAmber,
@@ -457,57 +417,36 @@ fun NoiseControlScreen(
                 )
             }
 
-            Text(
-                text = "Utiliza el Multi-Band Compressor (MBC) y filtro paso-alto para eliminar el 'hiss' (siseo eléctrico del DAC Bluetooth) y vibraciones de masa por debajo de 40 Hz.",
-                style = MaterialTheme.typography.bodyMedium.copy(
-                    fontSize = 11.sp,
-                    color = DarkTextSecondary
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                HybridSliderField(
+                    title = "Corte Sub-hum (<40Hz)",
+                    value = config.subHumCutoffHz,
+                    onValueChange = { viewModel.updateNoiseControlConfig(config.copy(subHumCutoffHz = it)) },
+                    range = 20.0f..100.0f,
+                    unit = "Hz",
+                    decimalPlaces = 0,
+                    accentColor = CyberAmber,
+                    enabled = config.dspNoiseGateEnabled,
+                    modifier = Modifier.weight(1f)
                 )
-            )
 
-            // Control Híbrido: Filtro Sub-hum (Paso-Alto)
-            HybridSliderField(
-                title = "Filtro Paso-Alto Sub-hum (Corte Parásito)",
-                value = config.subHumCutoffHz,
-                onValueChange = { newHz ->
-                    viewModel.updateNoiseControlConfig(config.copy(subHumCutoffHz = newHz))
-                },
-                range = 20.0f..100.0f,
-                unit = "Hz",
-                decimalPlaces = 0,
-                accentColor = CyberAmber,
-                enabled = config.dspNoiseGateEnabled
-            )
-
-            // Control Híbrido: Puerta de Ruido / Noise Gate Threshold
-            HybridSliderField(
-                title = "Umbral de Silencio (Noise Gate)",
-                value = config.noiseGateThresholdDb,
-                onValueChange = { newDb ->
-                    viewModel.updateNoiseControlConfig(config.copy(noiseGateThresholdDb = newDb))
-                },
-                range = -80.0f..-30.0f,
-                unit = "dB",
-                decimalPlaces = 1,
-                accentColor = AcidPink,
-                enabled = config.dspNoiseGateEnabled
-            )
-
-            // Control Híbrido: Atenuación de Siseo (Hiss Reduction)
-            HybridSliderField(
-                title = "Atenuación de Siseo (> 8kHz)",
-                value = config.hissReductionDb,
-                onValueChange = { newDb ->
-                    viewModel.updateNoiseControlConfig(config.copy(hissReductionDb = newDb))
-                },
-                range = 0.0f..15.0f,
-                unit = "dB",
-                decimalPlaces = 1,
-                accentColor = NeonCyan,
-                enabled = config.dspNoiseGateEnabled
-            )
+                HybridSliderField(
+                    title = "Atenuación Hiss (>8kHz)",
+                    value = config.hissReductionDb,
+                    onValueChange = { viewModel.updateNoiseControlConfig(config.copy(hissReductionDb = it)) },
+                    range = 0.0f..15.0f,
+                    unit = "dB",
+                    decimalPlaces = 1,
+                    accentColor = NeonCyan,
+                    enabled = config.dspNoiseGateEnabled,
+                    modifier = Modifier.weight(1f)
+                )
+            }
         }
 
-        Spacer(modifier = Modifier.height(20.dp))
+        Spacer(modifier = Modifier.height(10.dp))
     }
 }
