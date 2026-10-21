@@ -113,7 +113,7 @@ fun MainScreen(
                     IconButton(
                         onClick = {
                             scope.launch {
-                                AppUpdater.checkForUpdates(context)
+                                AppUpdater.checkForUpdates(context, showFeedback = true)
                             }
                         },
                         modifier = Modifier.size(24.dp)

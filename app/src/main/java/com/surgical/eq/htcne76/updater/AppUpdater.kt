@@ -3,8 +3,8 @@ package com.surgical.eq.htcne76.updater
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import android.os.Build
 import android.util.Log
+import android.widget.Toast
 import androidx.core.content.FileProvider
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -40,7 +40,7 @@ object AppUpdater {
     private val _downloadProgress = MutableStateFlow(0)
     val downloadProgress: StateFlow<Int> = _downloadProgress.asStateFlow()
 
-    suspend fun checkForUpdates(context: Context): UpdateInfo? = withContext(Dispatchers.IO) {
+    suspend fun checkForUpdates(context: Context, showFeedback: Boolean = false): UpdateInfo? = withContext(Dispatchers.IO) {
         try {
             val url = URL(API_URL)
             val connection = (url.openConnection() as HttpURLConnection).apply {
@@ -50,14 +50,15 @@ object AppUpdater {
                 setRequestProperty("User-Agent", "SurgicalAudioEQ-App")
             }
 
-            if (connection.responseCode == 200) {
+            val responseCode = connection.responseCode
+
+            if (responseCode == 200) {
                 val responseText = connection.inputStream.bufferedReader().use { it.readText() }
                 val json = JSONObject(responseText)
                 val tagName = json.optString("tag_name", "")
                 val releaseName = json.optString("name", tagName)
                 val releaseNotes = json.optString("body", "Mejoras y correcciones automáticas.")
 
-                // Buscar el activo APK dentro de los assets
                 var downloadUrl = ""
                 val assets = json.optJSONArray("assets")
                 if (assets != null) {
@@ -87,10 +88,34 @@ object AppUpdater {
                 )
 
                 _updateInfoFlow.value = if (isNewer) info else null
+
+                if (showFeedback) {
+                    withContext(Dispatchers.Main) {
+                        if (isNewer) {
+                            Toast.makeText(context, "Nueva versión encontrada: $tagName", Toast.LENGTH_SHORT).show()
+                        } else {
+                            Toast.makeText(context, "Ya tienes la última versión instalada ($currentVersion)", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                }
                 return@withContext if (isNewer) info else null
+            } else if (responseCode == 404) {
+                Log.w(TAG, "404 Not Found. El repositorio en GitHub es PRIVADO. Para permitir actualizaciones OTA automáticas, cámbialo a Público en Settings.")
+                if (showFeedback) {
+                    withContext(Dispatchers.Main) {
+                        Toast.makeText(context, "Repositorio privado en GitHub. Cámbialo a Público en Settings para activar OTA.", Toast.LENGTH_LONG).show()
+                    }
+                }
+            } else {
+                Log.w(TAG, "GitHub API respondió con código: $responseCode")
             }
         } catch (e: Exception) {
             Log.e(TAG, "Error comprobando actualizaciones: ${e.message}")
+            if (showFeedback) {
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(context, "No se pudo conectar a GitHub: ${e.message}", Toast.LENGTH_SHORT).show()
+                }
+            }
         }
         return@withContext null
     }
@@ -124,7 +149,6 @@ object AppUpdater {
                 instanceFollowRedirects = true
             }
 
-            // Manejar redirecciones (GitHub releases redirige a AWS S3)
             var actualConnection = connection
             if (connection.responseCode in listOf(301, 302, 307)) {
                 val newUrl = connection.getHeaderField("Location")
@@ -160,13 +184,15 @@ object AppUpdater {
             _isDownloading.value = false
             _downloadProgress.value = 100
 
-            // Lanzar la instalación automática del paquete APK
             withContext(Dispatchers.Main) {
                 installApk(context, apkFile)
             }
         } catch (e: Exception) {
             Log.e(TAG, "Error descargando o instalando actualización: ${e.message}")
             _isDownloading.value = false
+            withContext(Dispatchers.Main) {
+                Toast.makeText(context, "Error en la descarga: ${e.message}", Toast.LENGTH_SHORT).show()
+            }
         }
     }
 
@@ -185,6 +211,7 @@ object AppUpdater {
             context.startActivity(intent)
         } catch (e: Exception) {
             Log.e(TAG, "Error iniciando el instalador de paquetes de Android: ${e.message}")
+            Toast.makeText(context, "No se pudo abrir el instalador: ${e.message}", Toast.LENGTH_SHORT).show()
         }
     }
 
